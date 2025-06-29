@@ -54,22 +54,23 @@ def add_to_cart(user_id: int, product_id: int):
     try:
         with SessionLocal() as db:
             cart = db.query(Orders).filter(Orders.user_id == user_id, Orders.pay_status == False).first()
-            # cost = db.query(Products).filter_by(id=product_id).first().cost
+            cost = db.query(Products).filter_by(id=product_id).first().cost
 
         with SessionLocal() as db:
             if not cart:
-                cart = Orders(user_id=user_id, pay_status=False, content={'products': [product_id]}) #'total': cost
+                cart = Orders(user_id=user_id, pay_status=False, content={'products': [product_id],
+                                                                          'total': cost}) #'total': cost
                 db.add(cart)
             else:
-                cart.content.setdefault('products', []).append(product_id)
-                db.merge(cart)  # Используем merge для "прикрепления" объекта
+                # cart.content.setdefault('products', []).append(product_id)
+                # db.merge(cart)  # Используем merge для "прикрепления" объекта
 
-                # products = cart.content.get('products', []) # Безопасное извлечение, если нет такого ключа (защита от KeyError)
-                # products.append(product_id)
-                # cart.content['products'] = products
+                products = cart.content.get('products', []) # Безопасное извлечение, если нет такого ключа (защита от KeyError)
+                products.append(product_id)
+                cart.content['products'] = products
 
-                # total = float(cart.content.get('total')) + float(cost)
-                # cart.content['total'] = total
+                total = float(cart.content.get('total')) + float(cost)
+                cart.content['total'] = total
 
             # print(cart.content)
             db.commit()
